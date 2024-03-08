@@ -1,7 +1,13 @@
 import logo from './logo.svg';
+import { socket } from './socket';
 import './App.css';
 
 function App() {
+
+  socket.on('connect', ()=> {
+    console.log('Connected');
+  })
+
   return (
     <div className="App">
       <header className="App-header">

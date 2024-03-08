@@ -4,6 +4,7 @@ const http = require('http');
 const cors = require('cors');
 const socketIo = require('socket.io');
 const fileUpload = require("express-fileupload");
+const Sockets = require('../classes/Sockets');
 require('dotenv').config();
 
 class Server {
@@ -12,8 +13,11 @@ class Server {
         this.app = express();
         this.port = process.env.PORT || 4000;
         this.server = http.createServer( this.app );
-        this.io = socketIo(this.server);
+        this.io = socketIo( this.server, {
+            cors: '*'
+        } );
 
+        new Sockets( this.io );
         this.middlewares();
         this.routes();
     }

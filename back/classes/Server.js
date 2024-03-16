@@ -5,6 +5,7 @@ const cors = require('cors');
 const socketIo = require('socket.io');
 const fileUpload = require("express-fileupload");
 const Sockets = require('../classes/Sockets');
+const Database = require('../classes/Database');
 require('dotenv').config();
 
 class Server {
@@ -17,6 +18,7 @@ class Server {
             cors: '*'
         } );
 
+        new Database();
         new Sockets( this.io );
         this.middlewares();
         this.routes();
@@ -37,6 +39,17 @@ class Server {
         // Index
         this.app.get('/', (req, res) => {
             res.send('Backend');
+        });
+
+        this.app.use('/api/login', require('../routes/login.route')(this.io));
+        
+        // Rutas no configuradas mandar mensaje de error
+        this.app.use((req, res) => {
+            res.status(404).json({
+                message: 'Ruta no configurada',
+                method: req.method,
+                route:   req.originalUrl
+            });
         });
     }
 

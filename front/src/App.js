@@ -1,6 +1,6 @@
-import logo from './logo.svg';
 import { socket } from './socket';
-import './App.css';
+import Header from './components/ui/Header';
+import SearchLayout from './components/ui/SearchLayout';
 
 function App() {
 
@@ -11,21 +11,9 @@ function App() {
   socket.on('prueba', (data) => console.log(data));
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="">
+      <Header />
+      <SearchLayout />
     </div>
   );
 }

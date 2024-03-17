@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&display=swap');
+
+/* BOTONES*/
+.btn {
+    box-shadow: -5px 5px 0 0 rgba(0, 0, 0, 1);
+    border: 1px solid #000; 
+    background-color: #B6ADF7;
+}
+
+/* HEADER */
+.App-header {
+    /* background-color: #233A6C; */
+}
+
+
+/* SEARCH LAYOUT */
+.search {
+    background-color: #CACD7F;
+    color: #000;
+    font-family: 'Inter Tight';
+}
+    .search::placeholder {
+        font-family:'Inter Tight';
+        font-weight: 600;
+        color: #000;
+    }

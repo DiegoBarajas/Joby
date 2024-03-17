@@ -56,7 +56,7 @@ class Server {
     start(){
         this.server.listen( this.port, () => {
             console.clear();
-            console.log( color.cyan('Server launched on port:', this.port) );
+            console.log( color.cyan('[ SERVER ]   Launched on port', this.port ));
         });
     }
 

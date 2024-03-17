@@ -4,21 +4,26 @@ require('dotenv').config();
 
 class Database {
 
-    constructor(){
-        this.URI = process.env.MONGODB_URI;
+    constructor() {
+        this.URI = isEmpty( process.env.MONGODB_URI ) ? 'mongodb://127.0.0.1:27017/joby' : process.env.MONGODB_URI;
+        this.connect();
+    }
 
-        try {
-            mongoose.connect( this.URI );
-            this.connection = mongoose.connection;
-
-            this.connection.once('open', async()=>{
-                console.log(color.cyan('La base de datos se lanzó en',this.URI));
+    async connect() {
+        await mongoose.connect( this.URI )
+            .then(()=>{
+                console.log(color.cyan('[ DATABASE ] Connected successfully'));
+            })
+            .catch((err)=>{
+                console.error(color.red('[ERROR EN LA BASE DE DATOS] Error de conexión a MongoDB:'), '\n', err);
             });
-        }catch(err){
-            console.error( color.red('Hubo un error al conectar la base de datos:'), err )
-        }
     }
 
 }
 
 module.exports = Database;
+
+function isEmpty(atr){
+    if(atr == undefined || atr == null || atr == '') return true;
+    else return false;
+}

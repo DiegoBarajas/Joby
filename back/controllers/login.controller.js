@@ -1,8 +1,11 @@
 const HTTPHandler  = require('../classes/HTTPHandler');
+const MongooseHandler = require('../classes/MongooseHandler');
 const Mailer = require('../classes/Mailer');
-const Users = require('../models/users.model');
-const Passkeys = require('../models/passkey.model');
+const UsersModel = require('../models/users.model');
+const PasskeysModel = require('../models/passkey.model');
 const bcrypt = require('bcrypt');
+const passkeyModel = require('../models/passkey.model');
+const usersModel = require('../models/users.model');
 
 const controller = {};
 
@@ -13,25 +16,30 @@ function Login(io){
         const body = HTTPHandler.getBody(req, [ 'email', 'password' ]);
 
         if( body ){
-            const user = await Users.find({ email: body.email });
-            if(user.length > 0){
+            const mongooseHandler = new MongooseHandler(UsersModel);
 
-                if( bcrypt.compareSync(body.password, user[0].password) ){
+            mongooseHandler.findOne({ email: body.email })
+                .then(data => {
+                    if( data != null ){
 
-                    HTTPHandler.okResponse(res, user[0]);
-
-                }else{
-                    HTTPHandler.clientError(res, {
-                        message: 'Correo o contraseña incorrectos'
-                    });
-                }
-
-            }else{
-                HTTPHandler.clientError(res, {
-                    message: 'Correo o contraseña incorrectos'
-                });
-                return;
-            }
+                        if( bcrypt.compareSync(body.password, data.password) ){
+        
+                            HTTPHandler.okResponse(res, data);
+        
+                        }else{
+                            HTTPHandler.clientError(res, {
+                                message: 'Correo o contraseña incorrectos'
+                            });
+                        }
+        
+                    }else{
+                        HTTPHandler.clientError(res, {
+                            message: 'Correo o contraseña incorrectos'
+                        });
+                        return;
+                    }                
+                })
+                .catch(err => HTTPHandler.serverError(res, { error: err, message: 'Error en la base de datos' }));
 
         }else{
             HTTPHandler.clientError(res, {
@@ -44,7 +52,36 @@ function Login(io){
 
     // Crear cuenta
     controller.createUser = async(req, res) => {
+        const body = HTTPHandler.getBody(req, [ 'email', 'name', 'lastname', 'password' ]);
 
+        if( body ){
+            const userHandler = new MongooseHandler(UsersModel);
+            
+            userHandler.findOne({ email: body.email })
+                .then(user => {
+                    if(user == null){
+                        const password = bcrypt.hashSync(body.password, 5);
+
+                        userHandler.create({
+                            email: body.email,
+                            name: body.name,
+                            lastname: body.lastname,
+                            password
+                        }).then(data => HTTPHandler.okResponse(res, data))
+                        .catch(err => HTTPHandler.serverError(res, { error: err, message: 'Error en la base de datos' }));
+                    }else{
+                        HTTPHandler.clientError(res, { 
+                            error: 'Email ya registrado', 
+                            message: `El correo electronico ${body.email} ya esta registrado, prueba con otro diferente` 
+                        });
+                    }
+                }).catch(err => HTTPHandler.serverError(res, { error: err, message: 'Error en la base de datos' }));
+
+        }else{
+            HTTPHandler.clientError(res, {
+                message: "Correo o contraseña no ingresado correctamente"
+            });
+        }        
     }
 
     // Olvide mi contraseña
@@ -80,40 +117,53 @@ async function state1(req, res){
     const body = HTTPHandler.getBody(req, [ 'email' ]);
 
     if(body){
-        const user = await Users.find({ email: body.email });
+        const userHandler = new MongooseHandler(UsersModel);
+        const passkeysHandler = new MongooseHandler(PasskeysModel);
 
-        if(user.length > 0){
-            const passkey = createPasskey();
+        userHandler.findOne({ email: body.email })
+            .then(data => {
 
-            await Passkeys.findOneAndDelete({ userId: user[0].id });
-            new Passkeys({
-                userId: user[0].id,
-                userEmail: user[0].email,
-                passkey
-            }).save();
+                if((data) != null){
+                    const passkey = createPasskey();
 
-            const mailer = new Mailer();
-            mailer.sendTemplateMail(body.email, 'Joby: Recuperar contraseña', mailer.mailForgotPass, { name: user[0].name, passkey }, false)
-                .then((info) => {
+                    passkeysHandler.findOneAndDelete({ userId: data.id })
+                        .then(() => {
+                            passkeysHandler.create({
+                                userId: data.id,
+                                userEmail: data.email,
+                                passkey
+                            })
+                            .then(() => {
+                                const mailer = new Mailer();
+        
+                                mailer.sendTemplateMail(body.email, 'Joby: Recuperar contraseña', mailer.mailForgotPass, { name: data.name, passkey }, false)
+                                    .then((info) => {
+                                        HTTPHandler.okResponse(res, {
+                                            message: "Si el correo es correcto, se enviara un link para reiniciar la contraseña",
+                                            info
+                                        });
+                                    }).catch((err) => {
+                                        HTTPHandler.serverError(res, {
+                                            message: "Ha ocurrido un error al enviar el correo",
+                                            error: err
+                                        });
+                                    });
+        
+                            }).catch(err => HTTPHandler.serverError(res, { error: err, message: 'Error en la base de datos' }));
+                        }).catch(err => HTTPHandler.serverError(res, { error: err, message: 'Error en la base de datos' }));
+
+                    
+
+                }else{
                     HTTPHandler.okResponse(res, {
-                        message: "Si el correo es correcto, se enviara un link para reiniciar la contraseña",
-                        info
+                        message: "Si el correo es correcto, se enviara un link para reiniciar la contraseña"
                     });
-                }).catch((err) => {
-                    HTTPHandler.serverError(res, {
-                        message: "Ha ocurrido un error al enviar el correo",
-                        error: err
-                    });
-                });
+                }
+            }).catch(err => HTTPHandler.serverError(res, { error: err, message: 'Error en la base de datos' }));
 
-        }else{
-            HTTPHandler.okResponse(res, {
-                message: "Si el correo es correcto, se enviara un link para reiniciar la contraseña"
-            });
-        }
     }else{
-        HTTPHandler.clientError(res, {
-            message: "Correo no ingresado correctamente"
+        HTTPHandler.okResponse(res, {
+            message: "Si el correo es correcto, se enviara un link para reiniciar la contraseña"
         });
     }
 }
@@ -122,34 +172,29 @@ async function state2(req, res){
     const body = HTTPHandler.getBody(req, [ 'email', 'newPassword', 'passkey' ]);
 
     if(body){
-        const passkey = await Passkeys.findOne({ userEmail: body.email, passkey: body.passkey });
+        const passkeyHandler = new MongooseHandler(passkeyModel);
+        const userHandler = new MongooseHandler(usersModel);
 
-        if(passkey == null){
-            HTTPHandler.clientError(res, {
-                message: "Passkey incorrecto o expirado"
-            });
-        }else{
-            try{
-                const password = bcrypt.hashSync(body.newPassword, 5);
+        passkeyHandler.findOne({ userEmail: body.email, passkey: body.passkey })
+            .then(passkey => {
+                if(passkey == null){
+                    HTTPHandler.clientError(res, {
+                        message: "Passkey incorrecto o expirado"
+                    });
+                }else{
+                    const password = bcrypt.hashSync(body.newPassword, 5);
 
-                const user = await Users.findOneAndUpdate({ email: body.email },
-                {
-                    password
-                });
+                    userHandler.findOneAndUpdate({ email: body.email }, { password })
+                        .then(user => {
+                            HTTPHandler.okResponse(res, {
+                                message: 'Contraseña actualizada con exito',
+                                user
+                            });
 
-                HTTPHandler.okResponse(res, {
-                    message: 'Contraseña actualizada con exito',
-                    user
-                });
-
-                await Passkeys.findOneAndDelete({ userId: user.id });
-            }catch(err){
-                HTTPHandler.serverError(res, {
-                    message: 'Ha ocurrido un error al actualizar la contraseña',
-                    error: err
-                })
-            }
-        }
+                            passkeyHandler.findOneAndDelete({ userId: user.id });
+                        }).catch(err => HTTPHandler.serverError(res, { error: err, message: 'Error en la base de datos' }));
+                }
+            }).catch(err => HTTPHandler.serverError(res, { error: err, message: 'Error en la base de datos' }));
 
     }else{
         HTTPHandler.clientError(res, {

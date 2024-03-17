@@ -27,12 +27,12 @@ class Server {
     middlewares(){
         this.app.use( cors() );
         this.app.use( express.json() );
-        this.app.use( fileUpload(
-            {
+        this.app.use( 
+            fileUpload({
                 useTempFiles: true,
                 limits: {fileSize: 50 * 2024 * 1024}
-            }
-        ));
+            })
+        );
     }
 
     routes() {

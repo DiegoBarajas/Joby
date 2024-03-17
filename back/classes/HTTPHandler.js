@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 class HTTPHandler  {
     /* METODOS PUBLICOS */
     // METODO OK
@@ -21,15 +23,23 @@ class HTTPHandler  {
 
     getBody(req, keys){
         const { body } = req;
+        let success = true;
+        const requiredParams = {}
 
         for(let i=0 ; i<keys.length ; i++){
             if ( this.#isEmpty( body[ keys[i] ]) ){
-                return false;
+                success = false;
+                requiredParams[ keys[i] ] = false;
+
+                continue;
             }
+
+            requiredParams[ keys[i] ] = true;
+
         }
 
-        return body;
-    }
+        return success ? { success: true, body } : { success: false, body: requiredParams }
+    }  
 
 
     /* METODOS PUBLICOS */
@@ -54,7 +64,8 @@ class HTTPHandler  {
     }
 
     #isEmpty = (value) => {
-        return value == undefined || value == ''
+
+        return value === undefined || value === ''
             ? true
             : false
     }

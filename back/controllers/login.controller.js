@@ -1,9 +1,11 @@
 const HTTPHandler  = require('../classes/HTTPHandler');
+const FilesHandler = require('../classes/FilesHandler');
 const MongooseHandler = require('../classes/MongooseHandler');
+const bcrypt = require('bcrypt');
+const Path = require('path');
 const Mailer = require('../classes/Mailer');
 const UsersModel = require('../models/users.model');
 const PasskeysModel = require('../models/passkey.model');
-const bcrypt = require('bcrypt');
 const passkeyModel = require('../models/passkey.model');
 const usersModel = require('../models/users.model');
 
@@ -13,9 +15,9 @@ function Login(io){
 
     // Iniciar sesion
     controller.login = async(req, res) => {
-        const body = HTTPHandler.getBody(req, [ 'email', 'password' ]);
+        const { success, body } = HTTPHandler.getBody(req, [ 'email', 'password' ]);
 
-        if( body ){
+        if( success ) {
             const mongooseHandler = new MongooseHandler(UsersModel);
 
             mongooseHandler.findOne({ email: body.email })
@@ -43,7 +45,8 @@ function Login(io){
 
         }else{
             HTTPHandler.clientError(res, {
-                message: "Correo o contraseña no ingresado correctamente"
+                message: "Correo o contraseña no ingresado correctamente",
+                requiredParams: body
             });
         }
             
@@ -51,37 +54,24 @@ function Login(io){
     }
 
     // Crear cuenta
-    controller.createUser = async(req, res) => {
-        const body = HTTPHandler.getBody(req, [ 'email', 'name', 'lastname', 'password' ]);
+    controller.signIn = async(req, res) => {
+        const { state, userId } = req.params;
 
-        if( body ){
-            const userHandler = new MongooseHandler(UsersModel);
-            
-            userHandler.findOne({ email: body.email })
-                .then(user => {
-                    if(user == null){
-                        const password = bcrypt.hashSync(body.password, 5);
-
-                        userHandler.create({
-                            email: body.email,
-                            name: body.name,
-                            lastname: body.lastname,
-                            password
-                        }).then(data => HTTPHandler.okResponse(res, data))
-                        .catch(err => HTTPHandler.serverError(res, { error: err, message: 'Error en la base de datos' }));
-                    }else{
-                        HTTPHandler.clientError(res, { 
-                            error: 'Email ya registrado', 
-                            message: `El correo electronico ${body.email} ya esta registrado, prueba con otro diferente` 
-                        });
-                    }
-                }).catch(err => HTTPHandler.serverError(res, { error: err, message: 'Error en la base de datos' }));
-
-        }else{
-            HTTPHandler.clientError(res, {
-                message: "Correo o contraseña no ingresado correctamente"
-            });
-        }        
+        switch (state) {
+            case '1': signinState1(req, res);
+                break;
+            case '2': signinState2(req, res, userId)
+                break;
+            case '3': signinState3(req, res, userId);
+                    break;
+            case '4': signinState4(req, res, userId)
+                    break;
+            case '5': signinState5(req, res, userId);
+                        break;
+            default: HTTPHandler.clientError(res, {
+                        message: `Parametro 'state=${state}' no valido`
+                    });
+        }
     }
 
     // Olvide mi contraseña
@@ -97,26 +87,185 @@ function Login(io){
                         message: `Parametro 'state=${state}' no valido`
                     });
         }
-
     }
 
-  
+
 
     return controller;
 }
 
 module.exports = Login;
 
+// Funciones para SIGN IN (controller.signIn) segun state
+/*
+    1. Crear registro con (name, lastname, email, password)
+    2. Actualizar información personal (gender, disabilities) 
+    3. Subir experiencia laboral (experience)
+    4. Subir foto y curriculim (pic, cv)
+    5. Agregar una descripción personal (description)
+*/
+async function signinState1(req, res){
+    const { success, body } = HTTPHandler.getBody(req, [ 'email', 'name', 'lastname', 'password' ]);
+
+    if( success ) {
+        const userHandler = new MongooseHandler(UsersModel);
+            
+        userHandler.findOne({ email: body.email })
+            .then(user => {
+                if(user == null){
+                    const password = bcrypt.hashSync(body.password, 5);
+
+                    userHandler.create({
+                        email: body.email,
+                        name: body.name,
+                        lastname: body.lastname,
+                            password
+                    }).then(data => HTTPHandler.okResponse(res, data))
+                    .catch(err => HTTPHandler.serverError(res, { error: err, message: 'Error en la base de datos' }));
+                }else{
+                    HTTPHandler.clientError(res, { 
+                            error: 'Email ya registrado', 
+                        message: `El correo electronico ${body.email} ya esta registrado, prueba con otro diferente` 
+                    });
+                }
+            }).catch(err => HTTPHandler.serverError(res, { error: err, message: 'Error en la base de datos' }));
+
+    }else{
+        HTTPHandler.clientError(res, {
+            message: "Nombre, apellido, correo y/o contraseña no ingresado(s) correctamente",
+            requiredParams: body
+        });
+    }
+}
+
+async function signinState2(req, res, userId){
+    const { success, body } = HTTPHandler.getBody(req, [ 'gender', 'disabilities' ]);
+
+    if( success ) {
+        const userHandler = new MongooseHandler(usersModel);
+
+        userHandler.findById(userId)
+            .then(data => {
+                if(data != null){
+
+                    userHandler.findByIdAndUpdate(userId,{
+                        gender: body.gender,
+                        disabilities: body.disabilities
+                    })
+                    .then(user => HTTPHandler.okResponse(res, user))
+                    .catch(err => HTTPHandler.serverError(res, { error: err, message: 'Error en la base de datos' }));
+
+                }else{
+                    HTTPHandler.clientError(res, { error: 'ID no encontrado', message: 'No se encontró un registro con el userId indicado' });
+                }
+            })
+            .catch(err => HTTPHandler.serverError(res, { error: err, message: 'Error en la base de datos' }));
+
+    }else{
+        HTTPHandler.clientError(res, {
+            message: "Alguno de los valores no fue ingresado correctamente",
+            requiredParams: body
+        });
+    }
+}
+
+async function signinState3(req, res, userId){
+    const { success, body } = HTTPHandler.getBody(req, [ 'experience' ]);
+
+    if( success ) {
+        const userHandler = new MongooseHandler(usersModel);
+
+        userHandler.findById(userId)
+            .then(data => {
+                if(data != null){
+
+                    userHandler.findByIdAndUpdate(userId,{
+                        experience: body.experience,
+                    })
+                    .then(user => HTTPHandler.okResponse(res, user))
+                    .catch(err => HTTPHandler.serverError(res, { error: err, message: 'Error en la base de datos' }));
+
+                }else{
+                    HTTPHandler.clientError(res, { error: 'ID no encontrado', message: 'No se encontró un registro con el userId indicado' });
+                }
+            })
+            .catch(err => HTTPHandler.serverError(res, { error: err, message: 'Error en la base de datos' }));
+    }else{
+        HTTPHandler.clientError(res, {
+            message: "Alguno de los valores no fue ingresado correctamente",
+            requiredParams: body
+        });
+    }
+}
+
+async function signinState4(req, res, userId){
+    const { success, body } = HTTPHandler.getBody(req, [ ]);
+
+    if( success ) {
+        const { pic, cv } = FilesHandler.getAllFilesFromReq(req);
+        const userHandler = new MongooseHandler(UsersModel);
+
+        const userData = {}
+        if(pic != undefined) userData.pic = Buffer.from(pic.tempFilePath);
+        if(cv != undefined) userData.cv = Buffer.from(cv.tempFilePath);
+
+        userHandler.findByIdAndUpdate(userId, userData)
+            .then(user => {
+                HTTPHandler.okResponse(res, user);
+                FilesHandler.deleteAllFilesFromArray([pic, cv], 'tempFilePath');
+            })
+            .catch(err => {
+                HTTPHandler.serverError(res, { error: err, message: 'Error en la base de datos' });
+                FilesHandler.deleteAllFilesFromArray([pic, cv], 'tempFilePath');
+            });
+        
+
+    }else{
+        HTTPHandler.clientError(res, {
+            message: "Alguno de los valores no fue ingresado correctamente",
+            requiredParams: body
+        });
+    }
+}
+
+async function signinState5(req, res, userId){
+    const { success, body } = HTTPHandler.getBody(req, [ 'description' ]); // Description puede ser null
+
+    if( success ) {
+        const userHandler = new MongooseHandler(usersModel);
+
+        userHandler.findById(userId)
+            .then(data => {
+                if(data != null){
+
+                    userHandler.findByIdAndUpdate(userId,{
+                        description: body.description,
+                    })
+                    .then(user => HTTPHandler.okResponse(res, user))
+                    .catch(err => HTTPHandler.serverError(res, { error: err, message: 'Error en la base de datos' }));
+
+                }else{
+                    HTTPHandler.clientError(res, { error: 'ID no encontrado', message: 'No se encontró un registro con el userId indicado' });
+                }
+            })
+            .catch(err => HTTPHandler.serverError(res, { error: err, message: 'Error en la base de datos' }));
+    }else{
+        HTTPHandler.clientError(res, {
+            message: "Alguno de los valores no fue ingresado correctamente",
+            requiredParams: body
+        });
+    }
+}
+
 // Funciones para FORGOT (controller.forgotPassword) segun state
 /*
     1. Enviar correo electronico
     2. Cambiar contraseña 
 */
-
 async function state1(req, res){
-    const body = HTTPHandler.getBody(req, [ 'email' ]);
+    const { success, body } = HTTPHandler.getBody(req, [ 'email' ]);
 
-    if(body){
+    if( success ){
         const userHandler = new MongooseHandler(UsersModel);
         const passkeysHandler = new MongooseHandler(PasskeysModel);
 
@@ -169,9 +318,9 @@ async function state1(req, res){
 }
 
 async function state2(req, res){
-    const body = HTTPHandler.getBody(req, [ 'email', 'newPassword', 'passkey' ]);
+    const { success, body } = HTTPHandler.getBody(req, [ 'email', 'newPassword', 'passkey' ]);
 
-    if(body){
+    if( success ){
         const passkeyHandler = new MongooseHandler(passkeyModel);
         const userHandler = new MongooseHandler(usersModel);
 
@@ -198,7 +347,8 @@ async function state2(req, res){
 
     }else{
         HTTPHandler.clientError(res, {
-            message: "Correo, nueva contraseña o passkey no ingresado correctamente"
+            message: "Correo, nueva contraseña o passkey no ingresado correctamente",
+            requiredParams: body
         });
     }
 

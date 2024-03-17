@@ -7,8 +7,8 @@ function Login(io) {
     router.route('/')
         .post( controller.login )
 
-    router.route('/signin')
-        .post( controller.createUser )
+    router.route('/signin/:userId/:state')
+        .post( controller.signIn )
 
     router.route('/forgot/:state')
         .post( controller.forgotPassword )

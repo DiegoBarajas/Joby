@@ -16,7 +16,57 @@ class MongooseHandler{
                     .then((data) => resolve(data))
                     .catch(err => reject({
                             error: err,
-                            message: 'Ha ocurrido un error al intentar hacer la operación'
+                            message: err.message
+                        })
+                    )
+                
+            }else{
+                reject({
+                    error: '[BASE DE DATOS NO CONECTADA]',
+                    message: 'La base de datos esta desconectada'
+                });
+            }
+
+        });
+    }
+
+    async findById(id) {
+        return new Promise(async(resolve, reject) => {
+            const dbStatus = await this.#comprobateConnection();
+
+            if (dbStatus.connected) {
+                
+                this.Model.findById(id)
+                    .then((data) => resolve(data))
+                    .catch(err => reject({
+                            error: err,
+                            message: err.message
+                        })
+                    )
+                
+            }else{
+                reject({
+                    error: '[BASE DE DATOS NO CONECTADA]',
+                    message: 'La base de datos esta desconectada'
+                });
+            }
+
+        });
+    }
+
+    async findByIdAndUpdate(id, obj) {
+        return new Promise(async(resolve, reject) => {
+            const dbStatus = await this.#comprobateConnection();
+
+            if (dbStatus.connected) {
+                
+                this.Model.findByIdAndUpdate(id, obj)
+                    .then(async() => {
+                        resolve( await this.Model.findById(id) )
+                    })
+                    .catch(err => reject({
+                            error: err,
+                            message: err.message
                         })
                     )
                 
@@ -40,7 +90,7 @@ class MongooseHandler{
                     .then((data) => resolve(data))
                     .catch(err => reject({
                             error: err,
-                            message: 'Ha ocurrido un error al intentar hacer la operación'
+                            message: err.message
                         })
                     )
                 
@@ -64,7 +114,7 @@ class MongooseHandler{
                     .then((data) => resolve(data))
                     .catch(err => reject({
                             error: err,
-                            message: 'Ha ocurrido un error al intentar hacer la operación'
+                            message: err.message
                         })
                     )
                 
@@ -88,7 +138,7 @@ class MongooseHandler{
                     .then((data) => resolve(data))
                     .catch(err => reject({
                             error: err,
-                            message: 'Ha ocurrido un error al intentar hacer la operación'
+                            message: err.message
                         })
                     )
                 
@@ -112,7 +162,7 @@ class MongooseHandler{
                     .then((data) => resolve(data))
                     .catch(err => reject({
                             error: err,
-                            message: 'Ha ocurrido un error al intentar hacer la operación'
+                            message: err.message
                         })
                     )
                 

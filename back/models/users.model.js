@@ -8,10 +8,13 @@ const schema = new Schema({
 
     gender: { type: String, required: false },
     disabilities: { type: Array, required: false },
-    description: { type: String, required: false },
-    history: { type: Array, required: false },
+    
+    experience: { type: Array, required: false },
+    
     pic: { type: Buffer , required: false },
     cv: { type: Buffer , required: false },
+    
+    description: { type: String, required: false },
 },{
     timestamps: true
 });

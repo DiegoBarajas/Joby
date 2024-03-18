@@ -1,0 +1,16 @@
+.login {
+    font-family: 'Inter Tight';
+    font-weight: 900;
+    background-color: #222324;
+}
+
+.login-content, .signup-content {
+    border-radius: 100px 0 0 0;
+}
+
+.signup {
+    font-family: 'Inter Tight';
+    font-weight: 900;
+    background-color: #222324;
+}
+

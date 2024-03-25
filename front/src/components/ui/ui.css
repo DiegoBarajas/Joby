@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&display=swap');
+
+/* BOTONES*/
+.btn {
+    padding: 10px 30px;
+    margin: 10px 0;
+    border-radius: 10px;
+    box-shadow: 5px 5px 0 0 rgba(0, 0, 0, 1);
+    border: 1px solid #000; 
+}
+
+.google {
+    background-color: #30E584;
+}
+
+/* INPUTS Y LABELS */
+.input-base {
+    margin: 5px 0px 20px 0px;
+    border-radius: 20px 20px 0px 20px;
+    box-shadow: 5px 5px 0 0 rgba(0, 0, 0, 1);
+    border: 1px solid #000;
+}
+
+.input-login {
+    box-shadow: 5px 5px 0 0 rgba(0, 0, 0, 1);
+    border-radius: 20px;
+}
+
+.file {
+    box-shadow: 5px 5px 0 0 rgba(0, 0, 0, 1);
+    border-radius: 10px;
+}
+
+
+/* SEARCH LAYOUT */
+.search {
+    background-color: #CACD7F;
+    color: #000;
+    font-family: 'Inter Tight';
+}
+    .search::placeholder {
+        font-family:'Inter Tight';
+        font-weight: 600;
+        color: #000;
+    }

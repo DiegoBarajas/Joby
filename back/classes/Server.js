@@ -27,12 +27,12 @@ class Server {
     middlewares(){
         this.app.use( cors() );
         this.app.use( express.json() );
-        this.app.use( fileUpload(
-            {
+        this.app.use( 
+            fileUpload({
                 useTempFiles: true,
                 limits: {fileSize: 50 * 2024 * 1024}
-            }
-        ));
+            })
+        );
     }
 
     routes() {
@@ -56,7 +56,7 @@ class Server {
     start(){
         this.server.listen( this.port, () => {
             console.clear();
-            console.log( color.cyan('Server launched on port:', this.port) );
+            console.log( color.cyan('[ SERVER ]   Launched on port', this.port ));
         });
     }
 

@@ -2,7 +2,7 @@ const HTTPHandler  = require('../classes/HTTPHandler');
 const FilesHandler = require('../classes/FilesHandler');
 const MongooseHandler = require('../classes/MongooseHandler');
 const bcrypt = require('bcrypt');
-const Path = require('path');
+const fs = require('fs');
 const Mailer = require('../classes/Mailer');
 const UsersModel = require('../models/users.model');
 const PasskeysModel = require('../models/passkey.model');
@@ -206,8 +206,8 @@ async function signinState4(req, res, userId){
         const userHandler = new MongooseHandler(UsersModel);
 
         const userData = {}
-        if(pic != undefined) userData.pic = Buffer.from(pic.tempFilePath);
-        if(cv != undefined) userData.cv = Buffer.from(cv.tempFilePath);
+        if(pic != undefined) userData.pic = pic.data;
+        if(cv != undefined) userData.cv = fs.readFileSync(cv.tempFilePath);
 
         userHandler.findByIdAndUpdate(userId, userData)
             .then(user => {

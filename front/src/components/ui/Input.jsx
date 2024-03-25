@@ -13,6 +13,7 @@ function Input({label, type, variantI, variantL, extraI, extraL}) {
     base: 'input-base border border-black w-full',
     import: 'w-full h-auto',
     check: '',
+    file: 'file',
   }
 
 

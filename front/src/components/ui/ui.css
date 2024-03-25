@@ -9,10 +9,6 @@
     border: 1px solid #000; 
 }
 
-.login-btn {
-    background-color: #FFA51E;
-}
-
 .google {
     background-color: #30E584;
 }
@@ -28,6 +24,11 @@
 .input-login {
     box-shadow: 5px 5px 0 0 rgba(0, 0, 0, 1);
     border-radius: 20px;
+}
+
+.file {
+    box-shadow: 5px 5px 0 0 rgba(0, 0, 0, 1);
+    border-radius: 10px;
 }
 
 

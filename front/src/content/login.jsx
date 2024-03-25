@@ -10,7 +10,9 @@ function Login() {
   return (
     <div className='login'>
         <div className="logo flex justify-center p-5 py-10">
+          <Link to="/">
             <img src={Logo} alt="logo" className='w-40'/>
+          </Link>
         </div>
         <div className='bg-white login-content p-14'>
           <div className='pb-10'>  

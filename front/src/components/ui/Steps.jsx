@@ -6,14 +6,14 @@ export function Step1() {
   return (
     <div className='p-7 bg-white'>
       <p className='font-normal text-gray-500 text-xs flex w-full justify-end'>1/4</p>
-      <div className='p-6 bg-green-300 rounded-2xl mb-7'>
+      <div className='p-6 bg-green-200 rounded-2xl mb-7'>
         <p className='text-white text-xl font-extrabold mb-2'>Género</p>
         <Input variantI="check" variantL="check" label="Masculino" type="checkbox" extraL="text-white"/>
         <Input variantI="check" variantL="check" label="Femenino" type="checkbox" extraL="text-white"/>
         <Input variantI="check" variantL="check" label="No binario" type="checkbox" extraL="text-white"/>
         <Input variantI="check" variantL="check" label="Prefiero no decir" type="checkbox" extraL="text-white"/>
       </div>
-      <div className='p-6 bg-green-300 rounded-2xl'>
+      <div className='p-6 bg-green-200 rounded-2xl'>
         <p className='text-white text-xl font-extrabold mb-2'>¿Cuentas con alguno de estos tipos de discapacidad?</p>
         <Input variantI="check" variantL="check" label="Física" type="checkbox" extraL="text-white"/>
         <Input variantI="check" variantL="check" label="Sensorial" type="checkbox" extraL="text-white"/>
@@ -35,8 +35,8 @@ export function Step1() {
 export function Step2() {
   return (
     <div className='p-7'>
-      <p className='font-normal text-gray-500 text-xs flex w-full justify-end'>1/4</p>
-      <div className='p-6 bg-green-300 rounded-2xl mb-7'>
+      <p className='font-normal text-gray-500 text-xs flex w-full justify-end'>2/4</p>
+      <div className='p-6 bg-green-200 rounded-2xl mb-7'>
         <p className='text-white text-xl font-extrabold mb-2'>Experiencia laboral</p>
         <Input variantI="base" variantL="" label="" type="text" extraL="text-white"/>
       </div>
@@ -50,9 +50,12 @@ export function Step2() {
 
 export function Step3() {
   return (
-    <div className='flex-column m-auto step-transition'>
-      <h1>STEP 3</h1>   
-      <Input label="Foto de perfil" variant="input-base" type="document" />
+    <div className='p-7'>
+      <p className='font-normal text-gray-500 text-xs flex w-full justify-end'>3/4</p>
+      <div className='p-6 bg-green-200 rounded-2xl mb-7'>
+        <p className='text-white text-xl font-extrabold mb-2'>Elige una foto de perfil</p>
+        <Input variantI="file" label="" type="file" extraL="text-white" extraI="text-xs"/>
+      </div>
       <div className='pt-5'>
         <Link to='/step4'><Button variant="btnLink">Siguiente</Button></Link>
         <Link to='/step2'><Button variant="btnLink">Atras</Button></Link>
@@ -63,9 +66,12 @@ export function Step3() {
 
 export function Step4() {
   return (
-    <div className='flex-column m-auto step-transition'>
-      <h1>STEP 3</h1>   
-      <Input label="Descripcion" variant="input-base" />
+    <div className='p-7'>
+      <p className='font-normal text-gray-500 text-xs flex w-full justify-end'>4/4</p>
+      <div className='p-6 bg-green-200 rounded-2xl mb-7'>
+        <p className='text-white text-xl font-extrabold mb-2'>Experiencia laboral</p>
+        <Input variantI="base" variantL="" label="" type="text" extraL="text-white"/>
+      </div>
       <div className='pt-5'>
         <Link to='/home'><Button variant="btnLink">Finalizar</Button></Link>
       </div>

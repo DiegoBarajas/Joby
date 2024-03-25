@@ -17,28 +17,7 @@ function App() {
   })
 
   socket.on('prueba', (data) => console.log(data)); */
-
-  const [img, setImg] = useState('');
-
-  useEffect(() => {
-    const getData = async() => {
-      const { data } = await axios.post('http://localhost:8080/api/login/',{
-        email: 'desaubv@gmail.com',
-        password: 'diego382004'
-      })
-
-      const blob = new Blob([data.pic], { type: 'image/jpeg' }); // Puedes ajustar el tipo de imagen según corresponda
-      const imageUrl = URL.createObjectURL(blob);
-
-      console.log(blob);
-
-
-      setImg( imageUrl );
-    }
-  
-    getData();
-  }, [])
-  
+ 
 
   return (
     <div className="">

@@ -2,7 +2,7 @@
 import { Routes, Route } from 'react-router-dom'
 /* IMPORTACION DE PAGINAS */
 import Homepage from './content/Homepage';
-import Login from './content/login';
+import Login from './content/Login';
 import SignUp from './content/SignUp'
 import { Step1, Step2, Step3, Step4 } from './components/ui/Steps'
 
@@ -17,7 +17,6 @@ function App() {
   })
 
   socket.on('prueba', (data) => console.log(data)); */
- 
 
   return (
     <div className="">

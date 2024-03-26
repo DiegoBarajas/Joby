@@ -8,6 +8,7 @@ const UsersModel = require('../models/users.model');
 const PasskeysModel = require('../models/passkey.model');
 const passkeyModel = require('../models/passkey.model');
 const usersModel = require('../models/users.model');
+const CloudinaryHandler = require('../classes/CloudinaryHandler');
 
 const controller = {};
 
@@ -206,18 +207,39 @@ async function signinState4(req, res, userId){
         const userHandler = new MongooseHandler(UsersModel);
 
         const userData = {}
-        if(pic != undefined) userData.pic = pic.data;
-        if(cv != undefined) userData.cv = fs.readFileSync(cv.tempFilePath);
+        if(pic != undefined) {
+            if(cv != undefined) userData.cv = fs.readFileSync(cv.tempFilePath);
 
-        userHandler.findByIdAndUpdate(userId, userData)
-            .then(user => {
-                HTTPHandler.okResponse(res, user);
-                FilesHandler.deleteAllFilesFromArray([pic, cv], 'tempFilePath');
-            })
-            .catch(err => {
-                HTTPHandler.serverError(res, { error: err, message: 'Error en la base de datos' });
-                FilesHandler.deleteAllFilesFromArray([pic, cv], 'tempFilePath');
-            });
+            CloudinaryHandler.uploadFile(pic.tempFilePath)
+                .then(url => {
+                    userData.pic = url;
+
+                    userHandler.findByIdAndUpdate(userId, userData)
+                    .then(user => {
+                        HTTPHandler.okResponse(res, user);
+                        FilesHandler.deleteAllFilesFromArray([pic, cv], 'tempFilePath');
+                    })
+                    .catch(err => {
+                        HTTPHandler.serverError(res, { error: err, message: 'Error en la base de datos' });
+                        FilesHandler.deleteAllFilesFromArray([pic, cv], 'tempFilePath');
+                    });
+                    
+                }).catch(err => {
+                    HTTPHandler.serverError(res, { error: err, message: 'Error al subir la foto' });
+                })
+        }else{
+            if(cv != undefined) userData.cv = fs.readFileSync(cv.tempFilePath);
+
+            userHandler.findByIdAndUpdate(userId, userData)
+                .then(user => {
+                    HTTPHandler.okResponse(res, user);
+                    FilesHandler.deleteAllFilesFromArray([pic, cv], 'tempFilePath');
+                })
+                .catch(err => {
+                    HTTPHandler.serverError(res, { error: err, message: 'Error en la base de datos' });
+                    FilesHandler.deleteAllFilesFromArray([pic, cv], 'tempFilePath');
+                });
+        }
         
 
     }else{

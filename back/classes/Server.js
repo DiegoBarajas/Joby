@@ -3,6 +3,7 @@ const color = require('colors/safe');
 const http = require('http');
 const cors = require('cors');
 const socketIo = require('socket.io');
+const cloudinary = require('cloudinary').v2;
 const fileUpload = require("express-fileupload");
 const Sockets = require('../classes/Sockets');
 const Database = require('../classes/Database');
@@ -33,6 +34,12 @@ class Server {
                 limits: {fileSize: 50 * 2024 * 1024}
             })
         );
+
+        cloudinary.config({ 
+            cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+            api_key: process.env.CLOUDINARY_API_KEY, 
+            api_secret: process.env.CLOUDINARY_API_SECRET 
+        });
     }
 
     routes() {

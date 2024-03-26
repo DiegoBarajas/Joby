@@ -11,7 +11,7 @@ const schema = new Schema({
     
     experience: { type: Array, required: false },
     
-    pic: { type: Buffer , required: false },
+    pic: { type: String , required: false },
     cv: { type: Buffer , required: false },
     
     description: { type: String, required: false },

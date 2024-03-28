@@ -48,7 +48,9 @@ class Server {
             res.send('Backend');
         });
 
+        // Rutas
         this.app.use('/api/login', require('../routes/login.route')(this.io));
+        this.app.use('/api/documents', require('../routes/documents.route')(this.io));
         
         // Rutas no configuradas mandar mensaje de error
         this.app.use((req, res) => {

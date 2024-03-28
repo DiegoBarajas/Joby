@@ -140,7 +140,7 @@ async function signinState1(req, res){
 }
 
 async function signinState2(req, res, userId){
-    const { success, body } = HTTPHandler.getBody(req, [ 'gender', 'disabilities' ]);
+    const { success, body } = HTTPHandler.getBody(req, [ 'gender', 'disabilities', 'ocupation' ]);
 
     if( success ) {
         const userHandler = new MongooseHandler(usersModel);
@@ -151,7 +151,8 @@ async function signinState2(req, res, userId){
 
                     userHandler.findByIdAndUpdate(userId,{
                         gender: body.gender,
-                        disabilities: body.disabilities
+                        disabilities: body.disabilities,
+                        ocupation: body.ocupation,
                     })
                     .then(user => HTTPHandler.okResponse(res, user))
                     .catch(err => HTTPHandler.serverError(res, { error: err, message: 'Error en la base de datos' }));
@@ -171,7 +172,7 @@ async function signinState2(req, res, userId){
 }
 
 async function signinState3(req, res, userId){
-    const { success, body } = HTTPHandler.getBody(req, [ 'experience' ]);
+    const { success, body } = HTTPHandler.getBody(req, [ 'experience', 'schoolRecord' ]);
 
     if( success ) {
         const userHandler = new MongooseHandler(usersModel);
@@ -182,6 +183,7 @@ async function signinState3(req, res, userId){
 
                     userHandler.findByIdAndUpdate(userId,{
                         experience: body.experience,
+                        schoolRecord: body.schoolRecord
                     })
                     .then(user => HTTPHandler.okResponse(res, user))
                     .catch(err => HTTPHandler.serverError(res, { error: err, message: 'Error en la base de datos' }));
